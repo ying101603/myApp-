@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+     <script>
+        function click_label(object)
+         {
+             var div_object = document.getElementById("div_id");
+             if(!div_object)
+             {
+                div_object=document.createElement('p');
+                div_object.id='div_id'
+                div_object.innerHTML="HelloWorld";
+                document.body.appendChild(div_object)
+             }
+         }
+         window.onload=click_label
+         </script>
+</html>
