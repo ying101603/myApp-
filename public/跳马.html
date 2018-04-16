@@ -6,12 +6,10 @@
          </title>       
     </head>  
     <body>      
-         <form action="/test.php" method="get">
-             跳马  
+         <form action="/test.php" method="get"> 
              <br><br>                           
              行为x轴，列为y轴<br>  
-             如 3*4 指 3行格子*4列格子<br>  
-             行列数限制为10*10<br>  
+             如 3*4 指 3行格子*4列格子<br>   
              <hr>  
              棋盘设计:
              <br>  
@@ -32,7 +30,7 @@
              var path=new Array(MAX_STEP + 1);       
              for(var i=0;i<(MAX_STEP+1);i++){  
                  path[i]=new Array(2);  
-             }  
+             }  //存路径
              var dx=new Array( 0, 1, 2, 2, 1, -1, -2, -2, -1);  
              var dy=new Array( 0, 2, 1, -1, -2, 2, 1, -1, -2);       
              function Path(MAX_X, MAX_Y, step,xy){  
@@ -45,11 +43,11 @@
               }    
              function Judgment(x, y, xy){  
                  var judge = false;   
-                 if (xy[y][x]!=0)  
+                 if (xy[y][x]!=0)  //错误路径
                      judge = true;     
                  else  
                      xy[y][x] = 1;  
-                 return judge;  
+                 return judge;  //可行路径
              }   
              function Jump( MAX_X, MAX_Y,x,y,step,xy){  
                  var t1, t2, t3, t4;  
