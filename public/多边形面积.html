@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        多边形面积计算
+    </title>
+</head>
+
+<body>
+    <div1 style="margin-top:10px;">
+        <div>
+            <from style="margin-left:20pX;margin-top:5px;font-size:15px;font-family:楷体;">
+                <strong>选择文件：</strong>
+                <input id="File" type="file" multiple="mutifile" />
+            </from>
+        </div>
+
+        <from style="position:absolute;margin-left:20pX;margin-top:10px;font-size:15px;font-family:楷体;">
+            <strong>显示方式：</strong>
+            <select style="height:23px;" id="geoType">
+                <option value="mecator">墨卡托投影</option>
+                <option value="geography">地理坐标系</option>
+            </select>
+            <button type="button" onclick="clearcanvas();read();">显示</button>
+        </from>
+        <from style="position:absolute;margin-left:500px;margin-top:-22px;font-size:15px;font-family:楷体;">
+            <strong>选择城市：</strong>
+            <select style="height:23px;" id="city">
+                <option value="1">南京</option>
+                <option value="2">徐州</option>
+                <option value="3">宿迁</option>
+                <option value="4">盐城</option>
+                <option value="5">淮安</option>
+                <option value="6">泰州</option>
+                <option value="7">南通</option>
+                <option value="8">扬州</option>
+                <option value="9">连云港</option>
+                <option value="10">镇江</option>
+                <option value="11">常州</option>
+                <option value="12">无锡</option>
+                <option value="13">苏州</option>
+            </select>
+            <button onclick="areacalculate()">计算面积</button>
+        </from>
+        <from style="position:absolute;margin-left:500px;margin-top:8px;font-size:15px;font-family:楷体;">
+            <strong>计算结果(km²)</strong>
+            <input type="text" value="area" id="sum">
+        </from>
+        <p style="position:absolute;left:650px;top:50px;font-size:12px"></p>
+        <canvas id="canvas" style="border:1px solid #0000CD;position:absolute;margin-top:50px;margin-left:15px;"></canvas>
+        <script>
+            var times;
+            var canvas = document.getElementById('canvas');//获取画布ID为canvas
+            var ctext = canvas.getContext('2d');//获取绘图2D环境
+            canvas.width = 1230;
+            canvas.height = 570;
+            var latmax = 4156216.543;
+            var latmin = 3579743.802;
+            var longmax = 13574614.85;
+            var longmin = 12952537.5;
+            
+            var a1 = 600 / Math.max(latmax - latmin, longmax - longmin);
+            var xo = longmin;
+            var yo = latmax;
+            var meca = false, geo = false;//false为0
+            var area = 0;
+
+            var e = Math.sqrt(e2);//求e2的平方根
+            var a = 6378245;//克拉索夫斯基椭球体的长半轴
+            var b = 6356863.0187730473;//克拉索夫斯基椭球体的短半轴
+            var e2 = 0.006693421622966;//克拉索夫斯基椭球体第一偏心率平方
+            var e12 = 0.006738525414684;//克拉索夫斯基椭球体第二偏心率平方
+           
+
+           
+
+            function read() { 
+                var files = document.getElementById('File').files;
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    var reader = new FileReader();
+                    reader.readAsText(file);//以文本形式读取文件
+                    //成功读取
+                    reader.onload = function (e) {
+                        record = this.result;//读取文件
+                        show(record);//绘制该文件中包含的内容
+                    }
+                }
+            }
+            function clearset() {
+                area = 0;
+                document.getElementById("sum").value = area;
+            }
+            function areamecator(data) {//多边形的面积计算公式
+                var s = 0;
+                for (var i = 0; i < data.length; i++) {
+                    s += data[i][0] * data[(i + 1) % data.length][1] - data[(i + 1) % data.length][0] * data[i][1];
+                }
+                return Math.abs(s / 2);
+            }
+
+
+function InMecator(y,x)
+    {
+        var grid=generateGrid();
+        var K;
+        var B0,B;
+        var a,b,e,e1;
+        var L,L0;
+        var X;
+        var Y;             
+       
+        
+        B0=0;
+        a=6378245;  b=6356863.01877;   
+        e=Math.sqrt((a*a-b*b)/(a*a)); e1=Math.sqrt((a*a-b*b)/(b*b));
+        L0=0;
+        K=((a*a/b)/(Math.sqrt(1+e1*e1*Math.cos(B0*Math.PI/180)*Math.cos(B0*Math.PI/180))))*Math.cos(B0*Math.PI/180);
+      
+        var minX=grid[0].x,minY=grid[0].y,maxX=grid[0].x,maxY=grid[0].y;
+        var centerX,centerY;
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            L=grid[i].x;
+            B=grid[i].y;
+            grid[i].y=K*(L-L0);
+            grid[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+          
+            if(grid[i].x>maxX)
+            maxX=grid[i].x;
+            if(grid[i].y>maxY)
+            maxY=grid[i].y;
+            if(grid[i].x<minX)
+            minX=grid[i].x;
+            if(grid[i].y<minY)
+            minY=grid[i].y;
+        }
+        
+        centerX=(minX+maxX)/2;
+        centerY=(minY+maxY)/2;
+        for(var i=0;i<grid.length&&grid[i].id!=-1;i++)
+        {
+            grid[i].x=(grid[i].x-centerX)/12500;
+            grid[i].y=(grid[i].y-centerY)/500000;
+        }
+        for(var i=0;i<number.length&&number[i].id!=-1;i++)
+        {
+                                  
+            L=number[i].x;
+            B=number[i].y;
+            number[i].y=K*(L-L0);
+            number[i].x=K*Math.log(Math.tan(Math.PI/4+B*Math.PI/360)*Math.pow((1-(e*Math.sin(B*Math.PI/180)))/(1+(e*Math.sin(B*Math.PI/180))),e/2));
+            number[i].x=(number[i].x-centerX)/12500;
+            number[i].y=(number[i].y-centerY)/500000;
+         
+        }
+        var canvas=document.getElementById('Canvas');   
+        var ctx=canvas.getContext('2d');
+        ctx.beginPath();
+        var tempX,tempY;
+    
+        // tempX=number[0].y+500;
+        tempX=number[0].y;
+        tempY=400-number[0].x;                
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;number[i].x!=-1;i++)
+        {
+            if(number[i].id!=number[i-1].id)
+            {
+                ctx.beginPath();       
+               
+                // tempX=number[i].y+500;
+                tempX=number[i].y
+                tempY=400-number[i].x;      
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            // tempX=number[i].y+500;
+            tempX=number[i].y
+            tempY=400-number[i].x; 
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+        }
+        ctx.beginPath();
+        tempX=grid[0].y;
+        tempY=400-grid[0].x;            
+        ctx.moveTo(tempX,tempY);
+        for(var i=1;grid[i].id!=-1;i++)
+        {
+            if(grid[i].id!=grid[i-1].id)
+            {
+                ctx.beginPath();
+                tempX=grid[i].y;
+                tempY=400-grid[i].x;
+                ctx.moveTo(tempX,tempY);
+                continue;
+            }
+            tempX=grid[i].y;
+            tempY=400-grid[i].x;
+            ctx.lineTo(tempX,tempY);
+            ctx.stroke();   
+            
+        }
+    }
+
+ function generateGrid()
+    {
+        var count=0;
+        var index=1;
+        var grid = new Array();
+        for(var k=0;k<800;k++)
+        {    //一维长度为i,i为变量，可以根据实际情况改变
+            grid[k]=new co(-1,-1.0,-1.0);  //声明二维，每一个一维数组里面的一个元素都是一个数组；	
+        }
+        
+        for(var k=70;k<145;k=k+5)
+        {             
+     
+                    for(var m=0;m<60;m=m+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+                    grid[count].x=k;
+                    grid[count].y=m+5;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+        }
+        for(var m=0;m<=60;m=m+5)
+        {             
+              
+                    for(var k=70;k<=135;k=k+5)
+                {             
+                    grid[count].x=k;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+                    grid[count].x=k+5;
+                    grid[count].y=m;
+                    grid[count].id=index;
+                    count++;
+                    index++;
+                }
+        }
+        return grid;
+    }
+
+
+
+            function areageography(data) {
+
+                var T = 0;
+                var B = 90;//基准纬度，此处设置为90便于后续的比较
+                for (var i = 0; i < data.length; i++) {//转换坐标
+                    var tempx = data[i][0];
+                    var tempy = data[i][1];
+                    data[i] = InMecator(tempx, tempy);
+                    if (data[i][1] < B) {
+                        B = data[i][1];//取江苏省的最低纬度
+                    }
+                }
+                for (var i = 0; i < data.length - 1; i++) {
+                    var B1 = data[i][1] * Math.PI / 180;
+                    var B2 = data[i + 1][1] * Math.PI / 180;
+                    var L1 = data[i][0] * Math.PI / 180;
+                    var L2 = data[i + 1][0] * Math.PI / 180;
+                    var K = 2 * a * a * (1 - e2) * (L2 - L1);
+                    var K = 2 * a * a * (1 - e2) * (L2 - L1);
+                    var A = 1 + 1 / 2 * e2 + 3 / 8 * e2 * e2 + 5 / 16 * e2 * e2 * e2;
+                    var B = 1 / 6 * e2 + 3 / 16 * e2 * e2 + 3 / 16 * e2 * e2 * e2;
+                    var C = 3 / 80 * e2 * e2 + 1 / 16 * e2 * e2 * e2;
+                    var D = 1 / 112 * e2 * e2 * e2;
+                    var changeB = (B2 + B1) / 2 - B;
+                    var Bm = ((B1 + B2) / 2 + B) / 2;
+                    T += K * (A * Math.sin(changeB / 2) * Math.cos(Bm)
+                        - B * Math.sin(3 * changeB / 2) * Math.cos(3 * Bm)
+                        + C * Math.sin(5 * changeB / 2) * Math.cos(5 * Bm)
+                        - D * Math.sin(7 * changeB / 2) * Math.cos(7 * Bm));
+                }
+                return Math.abs(T);
+            }
+
+            function areacalculate() {
+                var code = document.getElementById('city').value;//读取地级市对应的编码
+
+                var type = document.getElementById('geoType').value;//获取类型
+
+                var file = document.getElementById('File').files[0];//读取文件
+                var reader = new FileReader();
+                reader.readAsText(file);
+                var record = null;
+
+                reader.onload = function (e) {
+                    record = this.result;
+                    record = record.split('\r\n');
+                    var start = false;
+                    var temp = 0;
+
+                    for (var i = 0; i < record.length; i++) {
+                        //寻找起点
+                        if (record[i] == 'END') {
+                            continue;
+                        }
+                        var point = record[i].split(',');
+                        if (point.length < 2 && parseInt(point) == code) {
+                            var j = i;
+                            do {
+                                var data = new Array(2);
+                                for (var i = 0; i < 2; i++) {
+                                    data[i] = new Array(2);
+                                }
+                                for (j = j + 1; record[j] != 'END'; j++) {
+                                    var point0 = record[j].split(',');
+                                    data[temp] = point0;
+                                    temp++;
+                                }
+                                if (type == "mecator") {
+                                    area += areamecator(data) / 1000000;
+                                }
+                                if (type == "geography") {
+                                    area += areageography(data) / 1000000;
+                                }
+                                temp = 0;
+                                j = j + 1;
+                            } while (record[j] == code)
+                            break;
+                        }
+                    }
+                    document.getElementById("sum").value = area;
+                }
+            }
+           
+
+
+            function clearcanvas() {
+                ctext.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            function show(record)//画地图
+            {
+                var type = document.getElementById('geoType').value;
+                var name = record.split('\r\n');
+                var start = false;
+                ctext.lineWidth = 1;
+                ctext.strokeStyle = "black";
+                //开始读取文件
+                for (var i = 0; i < name.length; i++) {
+                    //寻找起点
+                    if (name[i] == 'END') {
+                        ctext.stroke();
+                        continue;
+                    }
+                    var point = name[i].split(',');
+                    if (point.length < 2)
+                    {
+                        start = true;
+                        continue;
+                    }
+                    if (start) {
+                        var x0 = point[0];
+                        var y0 = point[1];
+                        if (type == "mecator") {
+                            var x0_ = a1 * (x0 - xo) + 300;
+                            var y0_ = a1 * (yo - y0) + 20;
+                        }
+                        if (type == "geography") {
+                            var point0 = InMecator(x0, y0);//变换
+                            x0_ = (point0[0] - 118) * 100 + 500;
+                            y0_ = canvas.height - (point0[1] - 30) * 100;
+                        }
+                        ctext.beginPath();
+                        ctext.moveTo(x0_, y0_);
+                        start = false;
+                    }
+                    else {
+                        var x1 = point[0];
+                        var y1 = point[1];
+                        if (type == "mecator") {
+                            var x1_ = a1 * (x1 - xo) + 300;
+                            var y1_ = a1 * (yo - y1) + 20;
+                        }
+                        if (type == "geography") {
+                            var point0 = InMecator(x1, y1);//变换
+                            x1_ = (point0[0] - 118) * 100 + 500;
+                            y1_ = canvas.height - (point0[1] - 30) * 100;
+                        }
+                        ctext.lineTo(x1_, y1_);
+                    }
+                }
+            }
+        </script>
+</body>
+
+</html>
